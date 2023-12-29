@@ -1,0 +1,55 @@
+.icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+.input {
+    margin-bottom: 15px;
+}
+
+.container {
+    display: inline-grid;
+    flex-direction: column;
+    margin: 250px;
+    background: aqua;
+    padding: 10px 77px 20px 10px;
+}
+
+.input input[type="email"], .input input[type="password"] {
+    width: 100%;
+    padding: 30px;
+    font-size: 26px;
+}
+
+.submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 220px;
+    height: 59px;
+    color: black;
+    background: blueviolet;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.submit-container {
+    display: flex;
+    gap: 30px;
+    margin: 18px auto;
+}
+
+.text {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
