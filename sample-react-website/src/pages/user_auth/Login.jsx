@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import user_icon from '../../assets/user.png'
 import password_icon from '../../assets/password.jpg'
 import AuthDetails from "./AuthDetails.jsx";
+import HeaderOne from "../../components/Header.jsx";
+import Navbar from "../../components/Navbar.jsx";
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -24,6 +26,8 @@ const Login = () => {
 
     return (
         <>
+            <Navbar/>
+            <HeaderOne/>
             <AuthDetails />
         <div className='container'>
             <div className="inputs">

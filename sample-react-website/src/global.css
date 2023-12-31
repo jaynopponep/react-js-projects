@@ -1,0 +1,29 @@
+body {
+    background-color: #232946;
+}
+.App {
+    color: #000000
+}
+
+.github_icon {
+    margin-left: 50px;
+    width: 60px;
+    height: 60px;
+}
+
+.linkedin_icon {
+    margin-left: 11px;
+    width: 60px;
+    height: 60px;
+}
+
+.title {
+    font-size: 50px;
+    text-align: center;
+}
+
+.header_icon {
+    margin-top: 16px;
+    width: 160px;
+    height: 160px;
+}

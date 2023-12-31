@@ -3,6 +3,8 @@ import Home from './pages/Home.jsx'
 import About from './pages/About.jsx'
 import Login from './pages/user_auth/Login.jsx'
 import SignUp from './pages/user_auth/SignUp.jsx'
+import Projects from './pages/Projects.jsx'
+import './global.css'
 function App() {
     return (
         <div className="App">
@@ -11,6 +13,7 @@ function App() {
                     <Route path='/' element={<Home />} />
                     <Route path='/home' element={<Home />} />
                     <Route path='/about' element={<About />} />
+                    <Route path='/projects' element={<Projects />} />
                     <Route path='/login' element={<Login />} />
                     <Route path='/signup' element={<SignUp />} />
                 </Routes>

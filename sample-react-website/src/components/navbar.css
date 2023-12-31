@@ -1,0 +1,49 @@
+* {
+    box-sizing: border-box;
+}
+
+@font-face{
+    font-family: mainFont;
+    src:url(../assets/mainFont.ttf);
+}
+
+body {
+    margin: 0;
+}
+
+.nav {
+    background-color: #232946;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.nav ul {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+
+}
+
+.nav a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.nav li.active {
+    background-color: #000000;
+}
+
+.nav_text {
+    background-color: #232946;
+    color: white !important;
+    font-size: 40px;
+    font-family: mainFont;
+    margin-right: 22px;
+}
