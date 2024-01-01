@@ -10,5 +10,5 @@ To learn and strengthen my skills in React; there is always more room to learn.
 - **Running on Webstorm:**
   - Make sure Node.js is already installed on your computer: https://nodejs.org/en
   - Initialize WebStorm project on Vite; given that Node.js is installed, an interpreter for node.js should be available to select when initializing a project
-  - Run `npm install react-router-dom` in terminal
+  - Run `npm install` and `npm install react-router-dom` in terminal to have both react & router-dom set up
   - [incomplete]
