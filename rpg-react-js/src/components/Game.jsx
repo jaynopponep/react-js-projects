@@ -1,45 +1,106 @@
 import React, { useState } from "react";
-import { ToastContainer, toast} from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+
+const ACTIONS = {
+    TOWN_SQUARE: {
+        one: "Go to store",
+        two: "Go to cave",
+        three: "Fight dragon"
+    },
+    STORE: {
+        one: "Buy 10 health (10 gold)",
+        two: "Buy weapon (30 gold)",
+        three: "Go to town square"
+    },
+    CAVE: {
+        one: "Fight slime",
+        two: "Fight fanged beast",
+        three: "Go to town square"
+    }
+};
 function Game() {
-    const [buttonOneText, setButtonOneText] = useState("Go to store");
-    const [buttonTwoText, setButtonTwoText] = useState("Go to cave");
-    const [buttonThreeText, setButtonThreeText] = useState("Fight dragon");
-    // Sets the default of buttonText as Go to store, but changes state with setButtonText in goStore function
-    const goStore = () => {
-      toast("Going to store...");
-        setButtonOneText("Buy 10 health (10 gold)");
-        setButtonTwoText("Buy weapon (30 gold)");
-        setButtonThreeText("Go to town square");
-    };
+    const [buttons, setButtons] = useState(ACTIONS.TOWN_SQUARE);
+    const [xp, setXp] = useState(0);
+    const [health, setHealth] = useState(100);
+    const [gold, setGold] = useState(50);
+    function ActionButton({ text, onClick }) {
+        return <button onClick={onClick}>{text}</button>;
+    }
+    function getButtonOneAction(buttonText) {
+        if (buttonText === ACTIONS.TOWN_SQUARE.one) {
+            return goStore;
+        } else if (buttonText === ACTIONS.STORE.one) {
+            return buyHealth;
+        } else {
+            return fightSlime;
+        }
+    }
 
-    const goCave = () => {
-        toast("Going to cave...");
-    };
-
-    const fightDragon = () => {
-        toast("Going to cave...");
-    };
+    function getButtonTwoAction(buttonText) {
+        if (buttonText === ACTIONS.TOWN_SQUARE.two) {
+            return goCave;
+        } else if (buttonText === ACTIONS.STORE.two) {
+            return buyWeapon;
+        } else {
+            return goTownSquare;
+        }
+    }
+    function getButtonThreeAction(buttonText) {
+        if (buttonText === ACTIONS.STORE.three || buttonText === ACTIONS.CAVE.three) {
+            return goTownSquare;
+        } else if (buttonText === ACTIONS.TOWN_SQUARE.three) {
+            return fightDragon;
+        }
+    }
 
     const goTownSquare = () => {
         toast("Returning to town square...");
-        setButtonOneText("Go to store");
-        setButtonTwoText("Go to cave");
-        setButtonThreeText("Fight dragon");
+        setButtons(ACTIONS.TOWN_SQUARE);
+    };
+
+    const goStore = () => {
+        toast("Going to store...");
+        setButtons(ACTIONS.STORE);
+    };
+
+    const goCave = () => {
+        toast("You enter the cave. You see some monsters.");
+        setButtons(ACTIONS.CAVE);
+    };
+
+    const fightDragon = () => {
+        toast("Going to fight the dragon...");
+    };
+    const buyHealth = () => {
+        if (gold <= 0) {
+            toast("Insufficient amount of gold...");
+            return;
+        }
+        toast("Buying 10 health...");
+        setGold(gold - 10);
+        setHealth(health + 10);
+    };
+    const buyWeapon = () => {
+        setGold(gold - 30);
+
+    };
+    const fightSlime = () => {
+      toast("Fighting slime...");
     };
 
     return (
         <div id="game">
             <ToastContainer/>
             <div id="stats">
-                <span className="stat">XP: <strong><span id="xpText">0</span></strong></span>
-                <span className="stat">Health: <strong><span id="healthText">100</span></strong></span>
-                <span className="stat">Gold: <strong><span id="goldText">50</span></strong></span>
+                <span className="stat">XP: <strong><span id="xpText">{xp}</span></strong></span>
+                <span className="stat">Health: <strong><span id="healthText">{health}</span></strong></span>
+                <span className="stat">Gold: <strong><span id="goldText">{gold}</span></strong></span>
             </div>
             <div id="controls">
-                <button id="button1" onClick={goStore}>{buttonOneText}</button>
-                <button id="button2" onClick={goCave}>{buttonTwoText}</button>
-                <button id="button3" onClick={buttonThreeText === "Go to town square" ? goTownSquare: fightDragon}>{buttonThreeText}</button>
+                <ActionButton text={buttons.one} onClick={() => getButtonOneAction(buttons.one)()} />
+                <ActionButton text={buttons.two} onClick={() => getButtonTwoAction(buttons.two)()} />
+                <ActionButton text={buttons.three} onClick={() => getButtonThreeAction(buttons.three)()} />
             </div>
             <div id="monsterStats">
                 <span className="stat">Monster Name: <strong><span id="monsterName"></span></strong></span>
@@ -50,6 +111,7 @@ function Game() {
                 You are in the town square. Where do you want to go? Use the buttons above.
             </div>
         </div>
-    )
+    );
 }
-export default Game
+
+export default Game;
