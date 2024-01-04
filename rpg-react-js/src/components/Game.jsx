@@ -19,11 +19,33 @@ const ACTIONS = {
         three: "Go to town square"
     }
 };
+const WEAPONS = {
+    STICK: {
+        name: "stick",
+        power: 5
+    },
+    DAGGER: {
+        name: "dagger",
+        power: 30
+    },
+    CLAW_HAMMER: {
+        name: "claw hammer",
+        power: 50
+    },
+    SWORD: {
+        name: "sword",
+        power: 100
+    }
+}
 function Game() {
+    const [inventory, setInventory] = useState(["stick"]);
+    const [currentWeapon, setCurrentWeapon] = useState(0);
     const [buttons, setButtons] = useState(ACTIONS.TOWN_SQUARE);
     const [xp, setXp] = useState(0);
     const [health, setHealth] = useState(100);
     const [gold, setGold] = useState(50);
+    const [text, setText] = useState("Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town.\n" +
+        "                You are in the town square. Where do you want to go? Use the buttons above.");
     function ActionButton({ text, onClick }) {
         return <button onClick={onClick}>{text}</button>;
     }
@@ -82,7 +104,15 @@ function Game() {
         setHealth(health + 10);
     };
     const buyWeapon = () => {
-        setGold(gold - 30);
+        if (gold > 30) {
+            setGold(gold - 30);
+            toast("Purchasing a dagger...");
+            const newWeaponIndex = currentWeapon + 1;
+            setCurrentWeapon(newWeaponIndex);
+            const newWeapon = WEAPONS[Object.keys(WEAPONS)[newWeaponIndex]].name;
+            setInventory([...inventory, newWeapon]);
+            setText(`You now have a ${newWeapon}.`);
+        }
 
     };
     const fightSlime = () => {
@@ -107,8 +137,7 @@ function Game() {
                 <span className="stat">Health: <strong><span id="monsterHealth"></span></strong></span>
             </div>
             <div id="text">
-                Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town.
-                You are in the town square. Where do you want to go? Use the buttons above.
+                {text}
             </div>
         </div>
     );
