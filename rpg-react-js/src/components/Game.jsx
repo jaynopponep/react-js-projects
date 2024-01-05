@@ -13,10 +13,20 @@ const ACTIONS = {
         two: "Buy weapon (30 gold)",
         three: "Go to town square"
     },
+    STORE_SELL: {
+        one: "Buy 10 health (10 gold)",
+        two: "Sell weapon for 15 gold",
+        three: "Go to town square"
+    },
     CAVE: {
         one: "Fight slime",
         two: "Fight fanged beast",
         three: "Go to town square"
+    },
+    FIGHT: {
+        one: "Attack",
+        two: "Dodge",
+        three: "Run"
     }
 };
 const WEAPONS = {
@@ -37,13 +47,32 @@ const WEAPONS = {
         power: 100
     }
 }
+
+const MONSTERS = {
+    SLIME: {
+      name: "slime",
+      level: 2,
+      health: 15
+    },
+    FANGED_BEAST: {
+        name: "fanged beast",
+        level: 8,
+        health: 60
+    },
+    DRAGON: {
+        name: "dragon",
+        level: 20,
+        health: 300
+    }
+}
 function Game() {
     const [inventory, setInventory] = useState(["stick"]);
     const [currentWeapon, setCurrentWeapon] = useState(0);
+    const [currentMonster, setCurrentMonster] = useState(-1);
     const [buttons, setButtons] = useState(ACTIONS.TOWN_SQUARE);
     const [xp, setXp] = useState(0);
     const [health, setHealth] = useState(100);
-    const [gold, setGold] = useState(50);
+    const [gold, setGold] = useState(300);
     const [text, setText] = useState("Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town.\n" +
         "                You are in the town square. Where do you want to go? Use the buttons above.");
     function ActionButton({ text, onClick }) {
@@ -64,6 +93,8 @@ function Game() {
             return goCave;
         } else if (buttonText === ACTIONS.STORE.two) {
             return buyWeapon;
+        } else if (buttonText === ACTIONS.STORE_SELL.two) {
+            return sellWeapon;
         } else {
             return goTownSquare;
         }
@@ -90,10 +121,42 @@ function Game() {
         toast("You enter the cave. You see some monsters.");
         setButtons(ACTIONS.CAVE);
     };
-
-    const fightDragon = () => {
-        toast("Going to fight the dragon...");
+    const buyWeapon = () => {
+        if (currentWeapon < 3) {
+            if (gold >= 30) {
+                setGold(gold - 30);
+                toast("Purchasing a dagger...");
+                const newWeaponIndex = currentWeapon + 1;
+                setCurrentWeapon(newWeaponIndex);
+                const newWeapon = WEAPONS[Object.keys(WEAPONS)[newWeaponIndex]].name;
+                setInventory([...inventory, newWeapon]);
+                setText(`You now have a ${newWeapon}.`);
+            } else {
+                setText("You don't have enough gold to purchase a new weapon.");
+                setButtons(ACTIONS.STORE_SELL);
+            }
+        } else {
+            setText("You already have the most powerful weapon.");
+            setButtons(ACTIONS.STORE_SELL);
+            return sellWeapon;
+        }
     };
+
+    const sellWeapon = () => {
+        if (currentWeapon > 0) {
+            setGold(gold + 15);
+            const newWeaponIndex = currentWeapon -1;
+            setCurrentWeapon(newWeaponIndex);
+            const newInventory = inventory.slice(0, -1);
+            setInventory(newInventory);
+            const soldWeapon  = WEAPONS[Object.keys(WEAPONS)[currentWeapon]].name;
+            setText(`You have sold a ${soldWeapon} for 15 gold.`);
+            setButtons(ACTIONS.STORE)
+        } else {
+            setText("No weapons available to sell.");
+            setButtons(ACTIONS.STORE);
+        }
+    }
     const buyHealth = () => {
         if (gold <= 0) {
             toast("Insufficient amount of gold...");
@@ -103,20 +166,16 @@ function Game() {
         setGold(gold - 10);
         setHealth(health + 10);
     };
-    const buyWeapon = () => {
-        if (gold > 30) {
-            setGold(gold - 30);
-            toast("Purchasing a dagger...");
-            const newWeaponIndex = currentWeapon + 1;
-            setCurrentWeapon(newWeaponIndex);
-            const newWeapon = WEAPONS[Object.keys(WEAPONS)[newWeaponIndex]].name;
-            setInventory([...inventory, newWeapon]);
-            setText(`You now have a ${newWeapon}.`);
-        }
 
-    };
     const fightSlime = () => {
-      toast("Fighting slime...");
+      setCurrentMonster(0);
+    };
+
+    const fightBeast = () => {
+        setCurrentMonster(1);
+    }
+    const fightDragon = () => {
+        setCurrentMonster(2);
     };
 
     return (
