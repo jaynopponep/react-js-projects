@@ -46,36 +46,36 @@ const ACTIONS = {
 };
 const WEAPONS = {
     STICK: {
-        name: "stick",
+        name: "Stick",
         power: 5
     },
     DAGGER: {
-        name: "dagger",
+        name: "Dagger",
         power: 30
     },
     CLAW_HAMMER: {
-        name: "claw hammer",
+        name: "Claw hammer",
         power: 50
     },
     SWORD: {
-        name: "sword",
+        name: "Sword",
         power: 100
     }
 }
 
 const MONSTERS = {
     SLIME: {
-      name: "slime",
+      name: "Slime",
       level: 2,
       health: 15
     },
     FANGED_BEAST: {
-        name: "fanged beast",
+        name: "Fanged beast",
         level: 8,
         health: 60
     },
     DRAGON: {
-        name: "dragon",
+        name: "Dragon",
         level: 20,
         health: 300
     }
@@ -88,6 +88,8 @@ function Game() {
     const [xp, setXp] = useState(0);
     const [health, setHealth] = useState(100);
     const [gold, setGold] = useState(30);
+    const [monsterName, setMonsterName] = useState("Slime");
+    const [monsterHealth, setMonsterHealth] = useState(0);
     const [text, setText] = useState("Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town." +
         "You are in the town square. Where do you want to go? Use the buttons above.");
     function ActionButton({ text, onClick }) {
@@ -101,12 +103,11 @@ function Game() {
         } else if (buttonText === ACTIONS.CAVE.one) {
             return fightSlime;
         } else if (buttonText === ACTIONS.KILL_MONSTER.one) {
-            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
             return goTownSquare;
         } else if (buttonText === ACTIONS.LOSE.one) {
-            return winOrLose(0);
+            return restart;
         } else if (buttonText === ACTIONS.WIN.one) {
-            return winOrLose(1);
+            return restart;
         } else {
             return attack;
         }
@@ -122,12 +123,11 @@ function Game() {
         } else if (buttonText === ACTIONS.CAVE.two) {
             return fightBeast;
         } else if (buttonText === ACTIONS.KILL_MONSTER.two) {
-            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
             return goTownSquare;
         } else if (buttonText === ACTIONS.LOSE.two) {
-            return winOrLose(0);
+            return restart;
         } else if (buttonText === ACTIONS.WIN.two) {
-            return winOrLose(1);
+            return restart;
         } else {
             return dodge;
         }
@@ -138,21 +138,38 @@ function Game() {
         } else if (buttonText === ACTIONS.TOWN_SQUARE.three) {
             return fightDragon;
         } else if (buttonText === ACTIONS.KILL_MONSTER.two) {
-            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
             return goTownSquare;
         } else if (buttonText === ACTIONS.LOSE.three) {
-            return winOrLose(0);
+            return restart;
         } else if (buttonText === ACTIONS.WIN.three) {
-            return winOrLose(1);
+            return restart;
         } else {
             return run;
         }
     }
 
     const goTownSquare = () => {
-        toast("Returning to town square...");
+        const monsterStats = document.getElementById("monsterStats");
+        monsterStats.style.display = "none";
         setButtons(ACTIONS.TOWN_SQUARE);
+        setText("You return to the town square.");
+        toast("Returning to town square...");
     };
+
+    const restart = () => {
+        const monsterStats = document.getElementById("monsterStats");
+        monsterStats.style.display = "none";
+        setButtons(ACTIONS.TOWN_SQUARE);
+        setText("You return to the town square.");
+        setXp(0);
+        setHealth(100);
+        setGold(50);
+        setCurrentWeapon(0);
+        setInventory(["stick"]);
+        toast("Returning to town square...");
+    };
+
+
 
     const goStore = () => {
         toast("Going to store...");
@@ -223,11 +240,37 @@ function Game() {
     };
     const goFight = (newMonster) => {
         setCurrentMonster(newMonster);
+        const monsterStats = document.getElementById("monsterStats");
+        monsterStats.style.display = "block";
         setText("You approach a " + MONSTERS[Object.keys(MONSTERS)[newMonster]].name + "... defeat it!");
+        setMonsterHealth(MONSTERS[Object.keys(MONSTERS)[newMonster]].health);
+        setMonsterName(MONSTERS[Object.keys(MONSTERS)[newMonster]].name);
         setButtons(ACTIONS.FIGHT);
     };
     const attack = () => {
-        setText("You attack the " + MONSTERS[Object.keys(MONSTERS)[currentMonster]].name + ".");
+        let newMonsterHealth = monsterHealth;
+        let newHealth = health;
+        setText("You attack the " + MONSTERS[Object.keys(MONSTERS)[currentMonster]].name + " with your " +
+        WEAPONS[Object.keys(WEAPONS)[currentWeapon]].name + ".");
+        newHealth -= getMonsterAttackValue(MONSTERS[Object.keys(MONSTERS)[currentMonster]].level);
+        setHealth(newHealth);
+        if (isMonsterHit()) {
+            newMonsterHealth -= (WEAPONS[Object.keys(WEAPONS)[currentWeapon]].power + Math.floor(Math.random() * xp) + 1)
+            setMonsterHealth(newMonsterHealth);
+        } else {
+            setText("You miss.");
+        }
+
+        if (newHealth <= 0) {
+            winOrLose(0);
+        } else if (newMonsterHealth <= 0) {
+            currentMonster === 2 ? winOrLose(1) : defeatMonster();
+        }
+
+        if (Math.random() <= .1 && inventory.length !== 1) {
+            setText(" Your " + inventory.pop() + " breaks.");
+            setCurrentWeapon(currentWeapon - 1);
+        }
     };
 
     const dodge = () => {
@@ -242,12 +285,28 @@ function Game() {
     const winOrLose = (outcome) => {
         if (outcome === 0) {
             setText("You die. ☠️")
+            setButtons(ACTIONS.LOSE);
         } else {
             setText("You defeat the dragon! YOU WIN THE GAME! 🎉");
+            setButtons(ACTIONS.WIN);
         }
     };
 
+    const getMonsterAttackValue = (level) => {
+        const hit = (level * 5) - (Math.floor(Math.random() * xp));
+        console.log(hit);
+        return hit > 0 ? hit : 0;
+    }
 
+    const isMonsterHit = () => {
+        return Math.random() > .2 || health < 20;
+    }
+    const defeatMonster = () => {
+        setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
+        setButtons(ACTIONS.KILL_MONSTER);
+        setGold(gold+Math.floor(MONSTERS[Object.keys(MONSTERS)[currentMonster]].level * 6.7));
+        setXp(MONSTERS[Object.keys(MONSTERS)[currentMonster]].level);
+    }
     return (
         <div id="game">
             <ToastContainer/>
@@ -262,8 +321,8 @@ function Game() {
                 <ActionButton text={buttons.three} onClick={() => getButtonThreeAction(buttons.three)()} />
             </div>
             <div id="monsterStats">
-                <span className="stat">Monster Name: <strong><span id="monsterName"></span></strong></span>
-                <span className="stat">Health: <strong><span id="monsterHealth"></span></strong></span>
+                <span className="stat">Monster Name: <strong><span id="monsterName">{monsterName}</span></strong></span>
+                <span className="stat">Health: <strong><span id="monsterHealth">{monsterHealth}</span></strong></span>
             </div>
             <div id="text">
                 {text}
