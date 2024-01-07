@@ -27,6 +27,21 @@ const ACTIONS = {
         one: "Attack",
         two: "Dodge",
         three: "Run"
+    },
+    KILL_MONSTER: {
+        one: "Go to town square",
+        two: "Go to town square",
+        three: "Go to town square"
+    },
+    LOSE: {
+        one: "REPLAY?",
+        two: "REPLAY?",
+        three: "REPLAY?"
+    },
+    WIN: {
+        one: "REPLAY?",
+        two: "REPLAY?",
+        three: "REPLAY?"
     }
 };
 const WEAPONS = {
@@ -68,23 +83,32 @@ const MONSTERS = {
 function Game() {
     const [inventory, setInventory] = useState(["stick"]);
     const [currentWeapon, setCurrentWeapon] = useState(0);
-    const [currentMonster, setCurrentMonster] = useState(-1);
+    const [currentMonster, setCurrentMonster] = useState(0);
     const [buttons, setButtons] = useState(ACTIONS.TOWN_SQUARE);
     const [xp, setXp] = useState(0);
     const [health, setHealth] = useState(100);
-    const [gold, setGold] = useState(300);
-    const [text, setText] = useState("Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town.\n" +
-        "                You are in the town square. Where do you want to go? Use the buttons above.");
+    const [gold, setGold] = useState(30);
+    const [text, setText] = useState("Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town." +
+        "You are in the town square. Where do you want to go? Use the buttons above.");
     function ActionButton({ text, onClick }) {
         return <button onClick={onClick}>{text}</button>;
     }
     function getButtonOneAction(buttonText) {
         if (buttonText === ACTIONS.TOWN_SQUARE.one) {
             return goStore;
-        } else if (buttonText === ACTIONS.STORE.one) {
+        } else if (buttonText === ACTIONS.STORE.one || buttonText === ACTIONS.STORE_SELL.one) {
             return buyHealth;
-        } else {
+        } else if (buttonText === ACTIONS.CAVE.one) {
             return fightSlime;
+        } else if (buttonText === ACTIONS.KILL_MONSTER.one) {
+            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
+            return goTownSquare;
+        } else if (buttonText === ACTIONS.LOSE.one) {
+            return winOrLose(0);
+        } else if (buttonText === ACTIONS.WIN.one) {
+            return winOrLose(1);
+        } else {
+            return attack;
         }
     }
 
@@ -95,15 +119,33 @@ function Game() {
             return buyWeapon;
         } else if (buttonText === ACTIONS.STORE_SELL.two) {
             return sellWeapon;
-        } else {
+        } else if (buttonText === ACTIONS.CAVE.two) {
+            return fightBeast;
+        } else if (buttonText === ACTIONS.KILL_MONSTER.two) {
+            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
             return goTownSquare;
+        } else if (buttonText === ACTIONS.LOSE.two) {
+            return winOrLose(0);
+        } else if (buttonText === ACTIONS.WIN.two) {
+            return winOrLose(1);
+        } else {
+            return dodge;
         }
     }
     function getButtonThreeAction(buttonText) {
-        if (buttonText === ACTIONS.STORE.three || buttonText === ACTIONS.CAVE.three) {
+        if (buttonText === ACTIONS.STORE.three || buttonText === ACTIONS.CAVE.three || buttonText === ACTIONS.STORE_SELL.three) {
             return goTownSquare;
         } else if (buttonText === ACTIONS.TOWN_SQUARE.three) {
             return fightDragon;
+        } else if (buttonText === ACTIONS.KILL_MONSTER.two) {
+            setText("The monster screams \"Arg!\" as it dies. You gain experience points and find gold.")
+            return goTownSquare;
+        } else if (buttonText === ACTIONS.LOSE.three) {
+            return winOrLose(0);
+        } else if (buttonText === ACTIONS.WIN.three) {
+            return winOrLose(1);
+        } else {
+            return run;
         }
     }
 
@@ -114,12 +156,24 @@ function Game() {
 
     const goStore = () => {
         toast("Going to store...");
+        setText("You enter the store. What would you like to purchase?");
         setButtons(ACTIONS.STORE);
     };
 
     const goCave = () => {
         toast("You enter the cave. You see some monsters.");
+        setText("You enter the cave...");
         setButtons(ACTIONS.CAVE);
+    };
+    const buyHealth = () => {
+        if (gold <= 0) {
+            toast("Insufficient amount of gold...");
+            return;
+        }
+        setText("You have purchased 10 health for 10 gold.");
+        toast("Buying 10 health...");
+        setGold(gold - 10);
+        setHealth(health + 10);
     };
     const buyWeapon = () => {
         if (currentWeapon < 3) {
@@ -141,7 +195,6 @@ function Game() {
             return sellWeapon;
         }
     };
-
     const sellWeapon = () => {
         if (currentWeapon > 0) {
             setGold(gold + 15);
@@ -157,26 +210,43 @@ function Game() {
             setButtons(ACTIONS.STORE);
         }
     }
-    const buyHealth = () => {
-        if (gold <= 0) {
-            toast("Insufficient amount of gold...");
-            return;
-        }
-        toast("Buying 10 health...");
-        setGold(gold - 10);
-        setHealth(health + 10);
-    };
 
     const fightSlime = () => {
-      setCurrentMonster(0);
+        goFight(0);
     };
 
     const fightBeast = () => {
-        setCurrentMonster(1);
+        goFight(1);
     }
     const fightDragon = () => {
-        setCurrentMonster(2);
+        goFight(2);
     };
+    const goFight = (newMonster) => {
+        setCurrentMonster(newMonster);
+        setText("You approach a " + MONSTERS[Object.keys(MONSTERS)[newMonster]].name + "... defeat it!");
+        setButtons(ACTIONS.FIGHT);
+    };
+    const attack = () => {
+        setText("You attack the " + MONSTERS[Object.keys(MONSTERS)[currentMonster]].name + ".");
+    };
+
+    const dodge = () => {
+      setText("You dodge the " + MONSTERS[Object.keys(MONSTERS)[currentMonster]].name + ".")  ;
+    };
+
+    const run = () => {
+      setText("You run away back to town square!");
+      return goTownSquare();
+    };
+
+    const winOrLose = (outcome) => {
+        if (outcome === 0) {
+            setText("You die. ☠️")
+        } else {
+            setText("You defeat the dragon! YOU WIN THE GAME! 🎉");
+        }
+    };
+
 
     return (
         <div id="game">
